@@ -4,14 +4,23 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+// Define the type that matches your API response
+type Project = {
+  id: number;
+  name: string;
+  description: string | null;
+  url: string;
+  stars: number;
+};
+
 export default function Projects() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetch("/api/project")
       .then((res) => res.json())
-      .then((data) => setProjects(data));
+      .then((data: Project[]) => setProjects(data));
   }, []);
 
   // Show only first 6 projects unless showAll is true
@@ -22,7 +31,9 @@ export default function Projects() {
       <h2 className="text-3xl font-bold text-center mb-10">Projects</h2>
       <div className="grid md:grid-cols-3 gap-6">
         {projects.length === 0 && (
-          <p className="text-center text-muted-foreground">Loading projects...</p>
+          <p className="text-center text-muted-foreground">
+            Loading projects...
+          </p>
         )}
         {visibleProjects.map((project) => (
           <Card key={project.id}>
@@ -36,6 +47,7 @@ export default function Projects() {
               <a
                 href={project.url}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-primary underline"
               >
                 View on GitHub →
