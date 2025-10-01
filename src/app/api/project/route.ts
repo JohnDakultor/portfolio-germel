@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 
+type GitHubRepo = {
+  id: number;
+  name: string;
+  description: string | null;
+  html_url: string;
+  fork: boolean;
+  stargazers_count: number;
+};
+
 export async function GET() {
   const username = process.env.GITHUB_USERNAME;
   const token = process.env.GITHUB_TOKEN;
 
   let page = 1;
-  let allRepos: any[] = [];
+  let allRepos: GitHubRepo[] = [];
 
   while (true) {
     const res = await fetch(
@@ -17,10 +26,13 @@ export async function GET() {
     );
 
     if (!res.ok) {
-      return NextResponse.json({ error: "Failed to fetch repos" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch repos" },
+        { status: 500 }
+      );
     }
 
-    const repos = await res.json();
+    const repos: GitHubRepo[] = await res.json();
 
     if (repos.length === 0) break; // no more pages
 
@@ -28,11 +40,11 @@ export async function GET() {
     page++;
   }
 
-  // Filter & sort (optional)
+  // Filter & sort
   const projects = allRepos
-    .filter((repo: any) => !repo.fork) // skip forks
+    .filter((repo) => !repo.fork) // skip forks
     .sort((a, b) => b.stargazers_count - a.stargazers_count) // sort by stars
-    .map((repo: any) => ({
+    .map((repo) => ({
       id: repo.id,
       name: repo.name,
       description: repo.description,
